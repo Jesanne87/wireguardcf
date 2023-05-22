@@ -1,0 +1,41 @@
+#!/bin/bash
+
+red(){
+    echo -e "\033[31m\033[01m$1\033[0m"
+}
+
+green(){
+    echo -e "\033[32m\033[01m$1\033[0m"
+}
+
+yellow(){
+    echo -e "\033[33m\033[01m$1\033[0m"
+}
+
+rm -f wgcf-account.toml wgcf-profile.conf
+echo | wgcf register
+chmod +x wgcf-account.toml
+wgcf generate
+chmod +x wgcf-profile.conf
+clear
+  read -rp "Masukkan kunci lesen akaun WARP : " warpkey
+  until [[ $warpkey =~ ^[A-Z0-9a-z]{8}-[A-Z0-9a-z]{8}-[A-Z0-9a-z]{8}$ ]]; do
+    read -rp "Masukkan kunci lesen akaun WARP : " warpkey
+  done
+  sed -i "s/license_key.*/license_key = \"$warpkey\"/g" wgcf-account.toml
+  read -rp "Sila masukkan nama Device Kamu, Jika tidak dimasukkan, nama Device akan dipilih secara rawak: " devicename
+  if [[ -n $devicename ]]; then
+    ./wgcf update --name $(echo $devicename | sed s/[[:space:]]/_/g)
+  fi
+echo | wgcf update
+sleep 1
+clear
+green "Fail konfigurasi WireGuard WGCF telah berjaya di buat"
+echo ""
+echo | wgcf status
+echo ""
+yellow "$(cat wgcf-profile.conf)"
+echo ""
+sleep 1
+red "Script By JsPhantom"
+echo ""
